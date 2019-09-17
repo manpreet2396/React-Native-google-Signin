@@ -1,0 +1,68 @@
+=>npm add react-native-google-signin
+=>run react-native link react-native-google-signin
+=> Update android/build.gradle with
+
+buildscript {
+    ext {
+        buildToolsVersion = "27.0.3"
+        minSdkVersion = 16
+        compileSdkVersion = 27
+        targetSdkVersion = 26
+        supportLibVersion = "27.1.1"
+        googlePlayServicesAuthVersion = "16.0.1" // <--- use this version or newer
+    }
+...
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.1.2' // <--- use this version or newer
+        classpath 'com.google.gms:google-services:4.1.0' // <--- use this version or newer
+    }
+...
+allprojects {
+    repositories {
+        mavenLocal()
+        google() // <--- make sure this is included
+        jcenter()
+        maven {
+            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+            url "$rootDir/../node_modules/react-native/android"
+        }
+    }
+}
+=> Update android/app/build.gradle with
+
+...
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "com.android.support:appcompat-v7:23.0.1"
+    implementation "com.facebook.react:react-native:+"
+    implementation(project(":react-native-google-signin"))
+}
+
+apply plugin: 'com.google.gms.google-services' // <--- this should be the last line
+=>Check that react-native link linked the native module
+in android/settings.gradle you should have
+...
+include ':react-native-google-signin', ':app'
+project(':react-native-google-signin').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-google
+=>then go to google sign in for android:
+https://developers.google.com/identity/sign-in/android/start
+=>Configure a Google API project
+To use the sample, you need to provide some additional information to finish setting up your project. Click the button below, and specify the package name com.google.samples.quickstart.signin when prompted. You will also need to provide the SHA-1 hash of your signing certificate. See Authenticating Your Client for information.
+
+CONFIGURE A PROJECT
+where you will have to put package name and sha1 key 
+sha1 key can be get by going to gradle on right side then click on app and then signing in report you will get sha1 key from there
+then after putting package name and sha1 key you will get download credentials configuration  
+Place the generated configuration file (credentials.json) into <YOUR_PROJECT_ROOT>/android/app
+from we have to copy client id and paste it in place of webClientId:
+componentDidMount() {
+    //initial configuration
+    GoogleSignin.configure({
+      //It is mandatory to call this method before attempting to call signIn()
+      scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+      // Repleace with your webClientId generated from Firebase console
+      webClientId: 'REPLACE_YOUR_WEB_CLIENT_ID_HERE',
+    });
+    //Check if user is already signed in
+    this._isSignedIn();
+  }
